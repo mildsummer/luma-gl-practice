@@ -115,15 +115,18 @@ uniform float uRefract;
 varying vec3 vPosition;
 varying vec3 vNormal;
 void main(void) {
-  vec4 color = vec4(1, 0, 0, 1); // Prism color is red
+  vec4 color = vec4(1, 1, 1, 1); // Prism color is red
   vec3 offsetPosition = vPosition - vec3(0, 0, 2.5);
   // The inner prism samples the texture cube in refract and reflect directions
-  vec3 reflectedDir = normalize(reflect(offsetPosition, vNormal));
-  vec3 refractedDir = normalize(refract(offsetPosition, vNormal, 0.75));
-  vec4 reflectedColor = mix(color, textureCube(uTextureCube, reflectedDir), uReflect);
-  vec4 refractedColor = mix(color, textureCube(uTextureCube, refractedDir), uRefract);
+  //vec3 reflectedDir = normalize(reflect(offsetPosition, vNormal));
+  vec3 reflectedDir = normalize(reflect(vPosition, vNormal));
+  //vec3 refractedDir = normalize(refract(offsetPosition, vNormal, 0.75));
+  vec3 refractedDir = normalize(refract(vPosition, vNormal, 0.75));
+  vec4 reflectedColor = textureCube(uTextureCube, reflectedDir);
+  //vec4 refractedColor = textureCube(uTextureCube, refractedDir);
   // Mix and multiply to keep it red
-  gl_FragColor = color * mix(reflectedColor, refractedColor, 0.5);
+  //gl_FragColor = color * mix(reflectedColor, refractedColor, 0.5);
+  gl_FragColor = mix(color, reflectedColor, 0.1);
 }
 `
   });
