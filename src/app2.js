@@ -1,24 +1,10 @@
-// RANDOM NOISE
-
 import {AnimationLoop, createGLContext, ClipSpaceQuad} from 'luma.gl';
 
 const RANDOM_NOISE_FRAGMENT_SHADER = `\
-#ifdef GL_ES
-precision highp float;
-#endif
-highp float random(vec2 co) {
-    highp float a = 12.9898;
-    highp float b = 78.233;
-    highp float c = 43758.5453;
-    highp float dt= dot(co.xy ,vec2(a,b));
-    highp float sn= mod(dt,3.14);
-    return fract(sin(sn) * c);
-}
 uniform float uTime;
 varying vec2 position;
 void main(void) {
-  float r = random(position + sin(uTime * 0.01));
-  gl_FragColor = vec4(r,r,r, 1);
+  gl_FragColor = vec4(position, 0, 1);
 }
 `;
 
