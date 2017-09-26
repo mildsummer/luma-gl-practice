@@ -1,6 +1,10 @@
-import {AnimationLoop, createGLContext, ClipSpaceQuad} from 'luma.gl';
+/**
+ * ミニマムなフラグメントシェーダーを使うサンプル
+ */
 
-const RANDOM_NOISE_FRAGMENT_SHADER = `\
+import { AnimationLoop, createGLContext, ClipSpaceQuad } from 'luma.gl';
+
+const FRAGMENT_SHADER = `\
 uniform float uTime;
 varying vec2 position;
 void main(void) {
@@ -9,16 +13,10 @@ void main(void) {
 `;
 
 new AnimationLoop({
-  onContext: () => createGLContext({canvas: 'lumagl-canvas'}),
-  onInitialize: ({gl}) => ({
-    clipSpaceQuad: new ClipSpaceQuad({gl, fs: RANDOM_NOISE_FRAGMENT_SHADER})
+  onInitialize: ({ gl }) => ({
+    clipSpaceQuad: new ClipSpaceQuad({ gl, fs: FRAGMENT_SHADER }) // 正方形の単純な画面を作るにはこれを使うらしい
   }),
-  onRender: ({gl, canvas, tick, clipSpaceQuad}) => {
-    canvas.width = canvas.clientWidth;
-    canvas.style.height = `${canvas.width}px`;
-    canvas.height = canvas.width;
-    gl.viewport(0, 0, canvas.width, canvas.height);
-
-    clipSpaceQuad.render({uTime: tick * 0.01});
+  onRender: ({ tick, clipSpaceQuad }) => {
+    clipSpaceQuad.render({ uTime: tick * 0.01 });
   }
-}).start();
+}).start({ canvas: 'lumagl-canvas' });

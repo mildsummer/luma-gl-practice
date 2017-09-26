@@ -1,8 +1,11 @@
-/* global document */
-import {AnimationLoop, GL, TextureCube, Cube, Matrix4, radians, setParameters} from 'luma.gl';
+/**
+ * 最初のサンプルに自力でライティング（平行光源）をしてみた
+ */
+
+import { AnimationLoop, GL, TextureCube, Cube, Matrix4, radians, setParameters } from 'luma.gl';
 
 const animationLoop = new AnimationLoop({
-  onInitialize: ({gl, canvas}) => {
+  onInitialize: ({ gl }) => {
     setParameters(gl, {
       clearColor: [0, 0, 0, 1],
       clearDepth: 1,
@@ -13,21 +16,14 @@ const animationLoop = new AnimationLoop({
     return {
       cube: getCube(gl),
       prism: getPrism(gl),
-      cubemap: new TextureCube(gl, {data: getFaceTextures({size: 512})})
+      cubemap: new TextureCube(gl, { data: getFaceTextures({ size: 512 }) })
     };
   },
-  onRender: ({gl, tick, aspect, cube, prism, cubemap}) => {
+  onRender: ({ gl, tick, aspect, cube, prism, cubemap }) => {
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
     const view = new Matrix4().lookAt({eye: [0, 0, -1]}).translate([0, 0, 4]);
     const projection = new Matrix4().perspective({fov: radians(75), aspect});
-
-    // Red uniforms
-    const reflectionElement = document.getElementById('reflection');
-    const refractionElement = document.getElementById('refraction');
-
-    const uReflect = reflectionElement ? parseFloat(reflectionElement.value) : 1;
-    const uRefract = refractionElement ? parseFloat(refractionElement.value) : 1;
 
     cube.render({
       uTextureCube: cubemap,
@@ -37,32 +33,17 @@ const animationLoop = new AnimationLoop({
     });
 
     const prismModelMatrix = new Matrix4().rotateX(tick * 0.01).rotateY(tick * 0.013);
-    const prismViewMatrix = new Matrix4().lookAt({eye: [0, 0, -1]}).translate([0, 0, 4]);
 
     prism.render({
       uTextureCube: cubemap,
-      uReflect,
-      uRefract,
-      uInvMatrix: projection.clone().multiplyRight(prismViewMatrix).multiplyRight(prismModelMatrix).invert(),
-      uLightDirection: [0.5, -0.5, -1.0],
+      uInvMatrix: projection.clone().multiplyRight(view).multiplyRight(prismModelMatrix).invert(),
+      uLightDirection: [0.5, 0.5, -1.0],
       uModel: prismModelMatrix,
-      uView: prismViewMatrix,
+      uView: view,
       uProjection: projection
     });
   }
 });
-
-animationLoop.getInfo = () => {
-  return `
-  <p>
-  A <code>cubemapped</code> prism within a larger cubemapped cube
-  <p>
-  Uses a luma.gl <code>TextureCube</code> and
-  the GLSL <code>reflect</code> and <code>refract</code> builtin functions
-  to calculate reflection and refraction directions from the prism normals
-  </p>
-    `;
-};
 
 function getCube(gl) {
   return new Cube({
@@ -147,7 +128,6 @@ void main(void) {
   });
 }
 
-// Create six textures for the cube map sides
 function getFaceTextures({size}) {
   const signs = ['pos', 'neg'];
   const axes = ['x', 'y', 'z'];
@@ -171,7 +151,6 @@ function getFaceTextures({size}) {
   return textures;
 }
 
-// Use canvas API to generate a texture for each side
 function drawTexture({ctx, sign, axis, size}) {
   if (axis === 'x' || axis === 'z') {
     ctx.translate(size, size);
@@ -191,12 +170,4 @@ function drawTexture({ctx, sign, axis, size}) {
   ctx.strokeRect(0, 0, size, size);
 }
 
-export default animationLoop;
-
-/* expose on Window for standalone example */
-/* global window */
-if (typeof window !== 'undefined') {
-  window.animationLoop = animationLoop;
-}
-
-animationLoop.start({canvas: 'lumagl-canvas'}); // eslint-disable-line
+animationLoop.start({ canvas: 'lumagl-canvas' });

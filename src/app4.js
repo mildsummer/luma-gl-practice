@@ -1,6 +1,10 @@
-import {AnimationLoop, createGLContext, ClipSpaceQuad, Texture2D, loadImage, GL} from 'luma.gl';
+/**
+ * テクスチャ画像を使ってみるサンプル
+ */
 
-const RANDOM_NOISE_FRAGMENT_SHADER = `\
+import { AnimationLoop, createGLContext, ClipSpaceQuad, Texture2D, loadImage, GL } from 'luma.gl';
+
+const NOISE_FRAGMENT_SHADER = `\
 uniform float uTime;
 uniform sampler2D uSampler;
 varying vec2 position;
@@ -81,6 +85,7 @@ float noise(vec3 P){
 }
 
 void main(void) {
+  // パーリンノイズを使ってオフセットさせた位置の色を描画する
   float n = noise(vec3(position * 5.0, uTime));
   float n2 = noise(vec3(position * 5.0, uTime + 100.0));
   vec2 offset = vec2(n / 10.0, n2 / 10.0);
@@ -91,13 +96,12 @@ void main(void) {
 `;
 
 new AnimationLoop({
-  onContext: () => createGLContext({canvas: 'lumagl-canvas'}),
   onInitialize: ({gl}) => {
-    return loadImage('cat.jpg')
+    return loadImage('cat.jpg') // テクスチャ画像を読み込む
       .then(image => (
-        {
-          clipSpaceQuad: new ClipSpaceQuad({gl, fs: RANDOM_NOISE_FRAGMENT_SHADER}),
-          texture2d: new Texture2D(gl, {
+        { // ここで返したものがonRenderで引数に入る
+          clipSpaceQuad: new ClipSpaceQuad({ gl, fs: NOISE_FRAGMENT_SHADER }),
+          texture2d: new Texture2D(gl, { // パラメータを与えてテクスチャを生成
             data: image,
             parameters: {
               [GL.TEXTURE_MAG_FILTER]: GL.NEAREST,
@@ -111,12 +115,7 @@ new AnimationLoop({
         }
     ));
   },
-  onRender: ({gl, canvas, tick, clipSpaceQuad, texture2d}) => {
-    canvas.width = canvas.clientWidth;
-    canvas.style.height = `${canvas.width}px`;
-    canvas.height = canvas.width;
-    gl.viewport(0, 0, canvas.width, canvas.height);
-
-    clipSpaceQuad.render({uTime: tick * 0.01, uSampler: texture2d});
+  onRender: ({ tick, clipSpaceQuad, texture2d }) => {
+    clipSpaceQuad.render({ uTime: tick * 0.01, uSampler: texture2d });
   }
-}).start();
+}).start({ canvas: 'lumagl-canvas' });
