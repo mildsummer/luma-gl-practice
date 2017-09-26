@@ -22,13 +22,13 @@ const animationLoop = new AnimationLoop({
       cubemap: new TextureCube(gl, { data: getFaceTextures({ size: 512 }) })
     };
   },
-  onRender: ({gl, tick, aspect, cube, prism, cubemap}) => { // 毎フレームの描画時に呼ばれる
+  onRender: ({ gl, tick, aspect, cube, prism, cubemap }) => { // 毎フレームの描画時に呼ばれる
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT); // 画面をクリア
 
     // ビューマトリックス
-    const view = new Matrix4().lookAt({eye: [0, 0, -1]}).translate([0, 0, 4]);
+    const view = new Matrix4().lookAt({ eye: [0, 0, -1] }).translate([0, 0, 4]);
     // プロジェクションマトリックス
-    const projection = new Matrix4().perspective({fov: radians(75), aspect});
+    const projection = new Matrix4().perspective({ fov: radians(75), aspect });
 
     cube.render({ //
       uTextureCube: cubemap,
