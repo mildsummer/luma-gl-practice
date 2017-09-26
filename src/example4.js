@@ -2,16 +2,15 @@
  * テクスチャ画像を使ってみるサンプル
  */
 
-import { AnimationLoop, createGLContext, ClipSpaceQuad, Texture2D, loadImage, GL } from 'luma.gl';
+import { AnimationLoop, ClipSpaceQuad, Texture2D, loadImage, GL } from 'luma.gl';
 
 const NOISE_FRAGMENT_SHADER = `\
 uniform float uTime;
 uniform sampler2D uSampler;
 varying vec2 position;
 
-//	Classic Perlin 3D Noise
-//	by Stefan Gustavson
-//
+// 3次元のパーリンノイズを作る関数
+// by Stefan Gustavson
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
 vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
 vec3 fade(vec3 t) {return t*t*t*(t*(t*6.0-15.0)+10.0);}

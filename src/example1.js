@@ -25,12 +25,12 @@ const animationLoop = new AnimationLoop({
   onRender: ({ gl, tick, aspect, cube, prism, cubemap }) => { // 毎フレームの描画時に呼ばれる
     gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT); // 画面をクリア
 
-    // ビューマトリックス
+    // ビューマトリックス（ビュー変換行列）
     const view = new Matrix4().lookAt({ eye: [0, 0, -1] }).translate([0, 0, 4]);
-    // プロジェクションマトリックス
+    // プロジェクションマトリックス（プロジェクション変換行列）
     const projection = new Matrix4().perspective({ fov: radians(75), aspect });
 
-    cube.render({ //
+    cube.render({ // ここでuniform変数を渡す
       uTextureCube: cubemap,
       uModel: new Matrix4().scale([5, 5, 5]),
       uView: view,
@@ -57,6 +57,7 @@ uniform mat4 uView;
 uniform mat4 uProjection;
 varying vec3 vPosition;
 void main(void) {
+  // プロジェクション変換行列・ビュー変換行列・モデル変換行列とかけることによって3D空間の座標を2D空間の座標に落とし込む
   gl_Position = uProjection * uView * uModel * vec4(positions, 1.0);
   vPosition = positions;
 }
@@ -69,7 +70,7 @@ precision highp float;
 uniform samplerCube uTextureCube;
 varying vec3 vPosition;
 void main(void) {
-  // The outer cube just samples the texture cube directly
+  // texureCubeというluma.glの組み込み関数で簡単に立方体のテクスチャを描画
   gl_FragColor = textureCube(uTextureCube, normalize(vPosition));
 }
 `
@@ -89,7 +90,7 @@ uniform mat4 uProjection;
 varying vec3 vPosition;
 varying vec3 vNormal;
 void main(void) {
-  gl_Position = uProjection * uView * uModel * vec4(positions, 1.0);
+  gl_Position = uProjection * uView * uModel * vec4(positions, 1.0) ;
   vPosition = vec3(uModel * vec4(positions,1));
   vNormal = vec3(uModel * vec4(normals, 1));
 }
@@ -104,12 +105,12 @@ varying vec3 vNormal;
 void main(void) {
   vec4 color = vec4(1, 1, 1, 1); // Prism color is red
   vec3 offsetPosition = vPosition - vec3(0, 0, 2.5);
-  // The inner prism samples the texture cube in refract and reflect directions
+  // 内側の立方体に外側の立方体のテクスチャが反射・屈折したように見せる
   vec3 reflectedDir = normalize(reflect(vPosition, vNormal));
   vec3 refractedDir = normalize(refract(vPosition, vNormal, 0.75));
   vec4 reflectedColor = textureCube(uTextureCube, reflectedDir);
   vec4 refractedColor = textureCube(uTextureCube, refractedDir);
-  // Mix and multiply to keep it red
+  // テクスチャの色とベースの色を掛け合わせる
   gl_FragColor = color * mix(reflectedColor, refractedColor, 0.5);
 }
 `

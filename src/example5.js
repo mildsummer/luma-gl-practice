@@ -36,7 +36,7 @@ const animationLoop = new AnimationLoop({
 
     prism.render({
       uTextureCube: cubemap,
-      uInvMatrix: projection.clone().multiplyRight(view).multiplyRight(prismModelMatrix).invert(),
+      uInvMatrix: projection.clone().multiplyRight(view).multiplyRight(prismModelMatrix).invert(), // 平行光源を表現するために、変換行列の逆行列を渡す
       uLightDirection: [0.5, 0.5, -1.0],
       uModel: prismModelMatrix,
       uView: view,
@@ -92,7 +92,9 @@ varying vec3 vPosition;
 varying vec3 vNormal;
 
 void main(void) {
+  // 光源のベクトルを求める
   vec3 invLight = normalize(uInvMatrix * vec4(uLightDirection, 0.0)).xyz;
+  // 光源のベクトルと法線ベクトルの内積(=光の影響力の強さ)を求める
   vBrightness = clamp(dot(normals, invLight), 0.1, 1.0);
 
   gl_Position = uProjection * uView * uModel * vec4(positions, 1.0);
@@ -111,17 +113,11 @@ varying float vBrightness;
 varying vec3 vPosition;
 varying vec3 vNormal;
 void main(void) {
-  vec4 color = vec4(vec3(vBrightness), 1);
+  vec4 color = vec4(vec3(vBrightness), 1); // 光の強さに合わせて色を変える
   vec3 offsetPosition = vPosition - vec3(0, 0, 2.5);
-  // The inner prism samples the texture cube in refract and reflect directions
-  //vec3 reflectedDir = normalize(reflect(offsetPosition, vNormal));
   vec3 reflectedDir = normalize(reflect(vPosition, vNormal));
-  //vec3 refractedDir = normalize(refract(offsetPosition, vNormal, 0.75));
   vec3 refractedDir = normalize(refract(vPosition, vNormal, 0.75));
   vec4 reflectedColor = textureCube(uTextureCube, reflectedDir);
-  //vec4 refractedColor = textureCube(uTextureCube, refractedDir);
-  // Mix and multiply to keep it red
-  //gl_FragColor = color * mix(reflectedColor, refractedColor, 0.5);
   gl_FragColor = mix(color, reflectedColor, 0.1);
 }
 `

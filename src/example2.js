@@ -2,12 +2,13 @@
  * ミニマムなフラグメントシェーダーを使うサンプル
  */
 
-import { AnimationLoop, createGLContext, ClipSpaceQuad } from 'luma.gl';
+import { AnimationLoop, ClipSpaceQuad } from 'luma.gl';
 
 const FRAGMENT_SHADER = `\
 uniform float uTime;
 varying vec2 position;
 void main(void) {
+  // 座標をrgbに変換する
   gl_FragColor = vec4(position, 0, 1);
 }
 `;
