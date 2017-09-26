@@ -30,6 +30,10 @@ Three.jsはシェーダー(GLSL)についての理解がなくてもある程度
 
 ## サンプルを見てみよう
 
+### インストール&ビルド
+    yarn && yarn start
+<http://localhost:8080/webpack-dev-server/> を開く
+
 ### example1. 立方体の表示
 - luma.glの大体の流れがわかる
 - attributes、uniforms、varyingsについて
